@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Blog Engine" default="war" basedir=".">
+  <description>Blog engine builder</description>
+
+
+  <target name="clean">
+    <delete dir="build/classes" />
+    <mkdir dir="build/classes"/>
+  </target>
+
+  <target name="compile">
+    <javac srcdir="src/" destdir="build/classes/">
+      <classpath>
+        <pathelement path="lib/freemarker-2.3.20.jar"/>
+        <pathelement path="lib/bson-3.0.4.jar"/>
+        <pathelement path="lib/mongodb-driver-3.0.4.jar"/>
+        <pathelement path="lib/mongodb-driver-core-3.0.4.jar"/>
+        <pathelement path="lib/javax.servlet.jar"/>
+     </classpath>
+    </javac>
+  </target>
+
+  <target name="staticwar">
+    <war destfile="static.war" 
+      basedir="public/"
+      needxmlfile="false">
+      <fileset dir="public/"/>      
+    </war>
+  </target>
+
+  <target name="war">
+    <war destfile="blogEngine.war" webxml="web.xml">
+      <classes dir="build/classes"/>
+    </war>
+  </target>
+
+  <target name="pack" depends="clean,compile,war" />
+
+</project>
