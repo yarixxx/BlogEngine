@@ -1,0 +1,1 @@
+db.posts.insert({"title" : "Second Post", "date" : new Date(), "name" : "second-post", "tags" : [ "Post", "Second" ] })

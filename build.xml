@@ -2,6 +2,23 @@
 <project name="Blog Engine" default="war" basedir=".">
   <description>Blog engine builder</description>
 
+  <target name="reload-content-files">
+    <apply executable="mongofiles" append="true" type="both">
+      <arg value="put"/>
+      <fileset dir="dummy-data/" includes="**/*.html"/>
+      <arg value="-r"/>
+    </apply>
+  </target>
+
+  <target name="reload-metadata">
+    <exec executable="mongo" inputstring="db.posts.drop()">
+    </exec>
+    <apply executable="mongo" verbose="true">
+      <fileset dir="dummy-data/" includes="**/*.js"/>
+    </apply>
+  </target>
+
+  <target name="reset-db" depends="reload-content-files,reload-metadata" />
 
   <target name="clean">
     <delete dir="build/classes" />
