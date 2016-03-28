@@ -2,23 +2,19 @@
 <project name="Blog Engine" default="war" basedir=".">
   <description>Blog engine builder</description>
 
-  <target name="reload-content-files">
-    <apply executable="mongofiles" append="true" type="both">
-      <arg value="put"/>
-      <fileset dir="dummy-data/" includes="**/*.html"/>
-      <arg value="-r"/>
-    </apply>
+  <target name="usage">
+    <echo message=""/>
+    <echo message="Blog engine build file"/>
+    <echo message="-----------------------------------"/>
+    <echo message=""/>
+    <echo message="Available targets are:"/>
+    <echo message=""/>
+    <echo message="build                --> Build the application"/>
+    <echo message="create-war           --> Create war package with application"/>
+    <echo message="create-static-war    --> Create plain war package with static resources"/>
+    <echo message="reset-db             --> Reload database and content files"/>
+    <echo message=""/>
   </target>
-
-  <target name="reload-metadata">
-    <exec executable="mongo" inputstring="db.posts.drop()">
-    </exec>
-    <apply executable="mongo" verbose="true">
-      <fileset dir="dummy-data/" includes="**/*.js"/>
-    </apply>
-  </target>
-
-  <target name="reset-db" depends="reload-content-files,reload-metadata" />
 
   <target name="clean">
     <delete dir="build/classes" />
@@ -37,20 +33,40 @@
     </javac>
   </target>
 
-  <target name="staticwar">
-    <war destfile="static.war" 
-      basedir="public/"
-      needxmlfile="false">
-      <fileset dir="public/"/>      
-    </war>
-  </target>
-
   <target name="war">
     <war destfile="blogEngine.war" webxml="web.xml">
       <classes dir="build/classes"/>
     </war>
   </target>
 
-  <target name="pack" depends="clean,compile,war" />
+  <target name="build" depends="clean,compile" />
+
+  <target name="create-war" depends="clean,compile,war" />
+
+
+  <target name="create-static-war">
+    <war destfile="static.war" basedir="public/" needxmlfile="false">
+      <fileset dir="public/"/>
+    </war>
+  </target>
+
+
+  <target name="replace-content-files">
+    <apply executable="mongofiles" append="true" type="both">
+      <arg value="put"/>
+      <fileset dir="dummy-data/" includes="**/*.html"/>
+      <arg value="-r"/>
+    </apply>
+  </target>
+
+  <target name="replace-metadata">
+    <exec executable="mongo" inputstring="db.posts.drop()">
+    </exec>
+    <apply executable="mongo" verbose="true">
+      <fileset dir="dummy-data/" includes="**/*.js"/>
+    </apply>
+  </target>
+
+  <target name="reset-db" depends="replace-content-files,replace-metadata" />
 
 </project>
