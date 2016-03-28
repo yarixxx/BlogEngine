@@ -5,6 +5,7 @@ public enum TemplateFields {
     POST("post"),
     POSTS("posts"),
     PAGE("page"),
+    TAG("tag"),
     ALL_TAGS("allTags"),
     TOP_TAGS("topTags"),
     LATEST_POSTS("announce"),

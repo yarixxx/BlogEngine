@@ -32,6 +32,7 @@ public class TagController extends BlogController {
             throw new NotFoundException("There is no posts for this tag.");
         }
 
+        model.put(TemplateFields.TAG.toString(), tag);
         model.put(TemplateFields.POSTS.toString(), posts);
         view.render(response, model);
     }
