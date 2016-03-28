@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Blog Engine" default="war" basedir=".">
+<project name="Blog Engine" default="usage" basedir=".">
   <description>Blog engine builder</description>
 
   <target name="usage">

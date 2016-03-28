@@ -18,7 +18,7 @@ Blog engine based on Java + MongoDB
     * mongodb-driver-3.0.4.jar
     * javax.servlet.jar (3.0)
     * freemarker-2.3.20.jar 
-3. Run `ant reset-db` to load mock data.
-4. Run `ant pack` to create *blogEngine.war*
+3. Run `ant reset-db` to reload mock data.
+4. Run `ant create-war` to create *blogEngine.war*
 5. Move *blogEngine.war* to `/var/lib/tomcat7/webapps/` folder of Tomcat.
 6. Create `/var/lib/tomcat7/freemarker-templates` and copy templates there.
