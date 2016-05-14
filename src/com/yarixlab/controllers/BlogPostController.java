@@ -1,6 +1,6 @@
 package com.yarixlab.controllers;
 
-import com.yarixlab.DatabaseService;
+import com.yarixlab.Requests;
 import com.yarixlab.TemplateFields;
 import com.yarixlab.exceptions.NotFoundException;
 import org.bson.Document;
@@ -33,7 +33,7 @@ public class BlogPostController extends BlogController {
 
         Document post = dataService.findByPermalink(permalink);
 
-        checkValidDate(year, month, post.getDate(DatabaseService.POST_DATE));
+        checkValidDate(year, month, post.getDate(Requests.POST_DATE));
         model.put(TemplateFields.POST.toString(), post);
         view.render(response, model);
     }

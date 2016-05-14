@@ -1,39 +1,33 @@
 package com.yarixlab;
 
-import com.mongodb.Block;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoCommandException;
+import com.mongodb.MongoException;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
+import com.yarixlab.exceptions.IncorrectPermalinkException;
 import com.yarixlab.exceptions.NotFoundException;
 import com.yarixlab.models.TagModel;
 import com.yarixlab.models.YearModel;
 import org.bson.Document;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static java.util.Arrays.asList;
-
 public class DatabaseService {
 
-    public static final String POSTS_COUNT = "count";
-    public static final String TAGS_COUNT = "count";
-    private static final String CONTENT_EXTENSION = ".html";
-
     private static final Logger LOGGER = Logger.getLogger(DatabaseService.class.getName());
-    public static final String POST_CONTENT = "content";
-    public static final String POST_DATE = "date";
-    public static final String POST_PERMALINK = "name";
-    public static final String POST_TAGS = "tags";
+    public static final String CONTENT_EXTENSION = ".html";
 
     final GridFS gridFs;
     final MongoCollection<Document> postsCollection;
@@ -51,160 +45,198 @@ public class DatabaseService {
     }
 
     public Document findByPermalink(String permalink) throws IOException, NotFoundException {
-        LOGGER.info("findByPermalink: " + permalink);
-        Document post = postsCollection.find(new Document(POST_PERMALINK, permalink)).first();
-        if (post == null) {
-            throw new NotFoundException("Post not found");
+        shouldHavePermalink(permalink);
+
+        Document post = postsCollection.find(Requests.findByPermalink(permalink)).first();
+        if (post.get(Requests.POST_TAGS) == null) {
+            post.put(Requests.POST_TAGS, Collections.emptyList());
         }
-        post.put(POST_CONTENT, findContentByPermalink(permalink));
+        post.put(Requests.POST_CONTENT, findContentByPermalink(permalink));
         return post;
     }
 
-    public List<Document> findByDateDescending(int limit, int page) throws IOException {
+    public boolean hasPermalink(String permalink) {
+        Document post = postsCollection.find(new Document(Requests.POST_PERMALINK, permalink)).first();
+        return post != null;
+    }
+
+    public void shouldHavePermalink(String permalink) throws NotFoundException {
+        if (!hasPermalink(permalink)) {
+            throw new NotFoundException("Post not found: " + permalink);
+        }
+    }
+
+    public void shouldHaveNoPermalink(String permalink) throws NotFoundException {
+        if (hasPermalink(permalink)) {
+            throw new NotFoundException("Post already exists: " + permalink);
+        }
+    }
+
+    public List<Document> showPageByDateDescending(int limit, int page, PostStatus status) {
+        return findByDateDescending(page, limit, Requests.findByStatus(status));
+    }
+
+    public List<Document> showPageByDateDescending(int limit, int page) throws IOException {
+        return findByDateDescending(page, limit, new Document());
+    }
+
+    public List<Document> findByDateDescending(int position, int limit, Document request) {
         MongoCursor<Document> cursor = postsCollection
-                .find()
-                .sort(new Document(POST_DATE, -1))
-                .skip(page * limit)
+                .find(request)
+                .sort(Requests.sortByDateDescending())
+                .skip(position)
                 .limit(limit)
                 .iterator();
         List<Document> posts = new ArrayList<Document>();
         while (cursor.hasNext()) {
             Document post = cursor.next();
-            post.put(POST_CONTENT, findContentByPermalink(post.getString(POST_PERMALINK)));
+            post.put(Requests.POST_CONTENT, findContentByPermalink(post.getString(Requests.POST_PERMALINK)));
             posts.add(post);
 
         }
         return posts;
     }
 
-    public List<Document> findLatestPosts(int limit) {
-        MongoCursor<Document> cursor = postsCollection
-                .find()
-                .sort(new Document(POST_DATE, -1))
+    public List<Document> listLatestPublishedPosts(int limit) {
+        MongoCursor<Document> cursor = findLatestPosts(limit, PostStatus.PUBLISHED);
+        return DataConverter.cursorToList(cursor);
+    }
+
+    public long getTotalPosts(PostStatus status) {
+        if (status == PostStatus.ALL) {
+            return postsCollection.count();
+        }
+        return postsCollection.count(Requests.findByStatus(status));
+    }
+
+    private MongoCursor<Document> findLatestPosts(int limit, PostStatus status) {
+        return postsCollection
+                .find(Requests.findByStatus(status))
+                .sort(Requests.sortByDateDescending())
                 .limit(limit)
                 .iterator();
-        List<Document> posts = new ArrayList<Document>();
-        while (cursor.hasNext()) {
-            Document post = cursor.next();
-            posts.add(post);
-
-        }
-        return posts;
     }
 
     public List<TagModel> getTopTags(int tagsNumber) {
-        final List<TagModel> allTags = new ArrayList<TagModel>();
+        final List<TagModel> allTags = new ArrayList<>();
 
-        this.takeTop10Tags().forEach(new Block<Document>() {
-            public void apply(final Document document) {
-                allTags.add(processTag(document));
-            }
-        });
+        MongoCursor<Document> cursor = this.takeTags(tagsNumber, 0).iterator();
+        while (cursor.hasNext()) {
+            allTags.add(DataConverter.createTagFromDocument(cursor.next()));
+        }
+        return allTags;
+    }
 
-        return allTags.subList(0, allTags.size() < tagsNumber ? allTags.size() : tagsNumber);
+    public List<Document> getTags(int skip, int number) {
+        MongoCursor<Document> cursor = takeTags(number, skip).iterator();
+        return DataConverter.cursorToList(cursor);
     }
 
     public List<TagModel> getAllTags() {
-        final List<TagModel> allTags = new ArrayList<TagModel>();
+        final List<TagModel> allTags = new ArrayList<>();
 
-        this.takeAllTags().forEach(new Block<Document>() {
-            public void apply(final Document document) {
-                allTags.add(processTag(document));
-            }
-        });
+        MongoCursor<Document> cursor = this.takeAllTags().iterator();
+        while (cursor.hasNext()) {
+            allTags.add(DataConverter.createTagFromDocument(cursor.next()));
+        }
         return allTags;
     }
 
     public List<Document> findByTag(String tagCode) throws IOException {
-        Document request = new Document();
-        request.put(POST_TAGS, new Document("$elemMatch", new Document("$eq", revertTag(tagCode).getTagName())));
-
         MongoCursor<Document> cursor = postsCollection
-                .find(request)
-                .sort(new Document(POST_DATE, -1))
+                .find(Requests.findByTag(DataConverter.createTagByCode(tagCode).getTagName()))
+                .sort(Requests.sortByDateDescending())
                 .iterator();
         List<Document> posts = new ArrayList<Document>();
         while (cursor.hasNext()) {
             Document post = cursor.next();
-            post.put(POST_CONTENT, findContentByPermalink(post.getString(POST_PERMALINK)));
+            post.put(Requests.POST_CONTENT, findContentByPermalink(post.getString(Requests.POST_PERMALINK)));
             posts.add(post);
         }
 
         return posts;
     }
 
-    public List<YearModel> getArchiveByYears() {
-        Document groupYears = new Document("$group",
-                new Document("_id", new Document("$year", "$date"))
-                        .append(POSTS_COUNT, new Document("$sum", 1)));
-        Document sortYears = new Document("$sort", new Document("_id", -1));
-        List<Document> aggrList =  asList(groupYears, sortYears);
+    public List<YearModel> getArchiveByYearsSafe() {
+        try {
+            return getArchiveByYears();
+        } catch (MongoCommandException exception) {
+            LOGGER.throwing(DatabaseService.class.getName(), "getArchiveByYearsSafe", exception);
+        }
+        return Collections.emptyList();
+    }
 
-        final List<YearModel> allYears = new ArrayList<YearModel>();
+    private List<YearModel> getArchiveByYears() throws MongoException {
+        final List<YearModel> allYears = new ArrayList<>();
 
-        postsCollection.aggregate(aggrList).forEach(new Block<Document>() {
-            public void apply(final Document document) {
-                YearModel yearModel = new YearModel();
-                yearModel.setYear(document.getInteger("_id"));
-                yearModel.setCount(document.getInteger(POSTS_COUNT));
-                allYears.add(yearModel);
-            }
-        });
-
+        MongoCursor<Document> cursor = postsCollection.aggregate(Requests.createRequestPostsNumberByYears()).iterator();
+        while (cursor.hasNext()) {
+            allYears.add(DataConverter.convertToYear(cursor.next()));
+        }
         return allYears;
     }
 
+    public List<Document> getRestArchiveByYears() {
+        MongoCursor<Document> cursor = postsCollection.aggregate(Requests.createRequestPostsNumberByYears()).iterator();
+        return DataConverter.cursorToList(cursor);
+    }
+
     private AggregateIterable<Document> takeAllTags() {
-        Document unwindTags = new Document("$unwind", "$tags");
-
-        Document groupTags = new Document("$group", new Document("_id", "$tags").append(POSTS_COUNT, new Document("$sum", 1)));
-
-        Document sortTags = new Document("$sort", new Document(TAGS_COUNT, -1));
-
-        List<Document> aggrList = asList(unwindTags, groupTags, sortTags);
-
-        return postsCollection.aggregate(aggrList);
+        return postsCollection.aggregate(Requests.requestAllTags());
     }
 
-    private AggregateIterable<Document> takeTop10Tags() {
-        Document unwindTags = new Document("$unwind", "$tags");
-
-        Document groupTags = new Document("$group", new Document("_id", "$tags").append(TAGS_COUNT, new Document("$sum", 1)));
-
-        Document sortTags = new Document("$sort", new Document(TAGS_COUNT, -1));
-
-        Document limitTags = new Document("$limit", 10);
-
-        List<Document> aggrList = asList(unwindTags, groupTags, sortTags, limitTags);
-
-        return postsCollection.aggregate(aggrList);
+    public AggregateIterable<Document> countTags() {
+        return postsCollection.aggregate(Requests.countTags());
     }
 
-    private TagModel processTag(Document document) {
-        TagModel tagModel = processTag(document.getString("_id"));
-        tagModel.setCount(document.getInteger(TAGS_COUNT));
-        return tagModel;
+    private AggregateIterable<Document> takeTags(int limit, int skip) {
+        return postsCollection.aggregate(Requests.takeTags(skip, limit));
     }
 
-    private TagModel processTag(String tagName) {
-        TagModel tag = new TagModel();
-        tag.setTagName(tagName);
-        tag.setTagCode(tagName.replaceAll("\\s+", "-"));
-        return tag;
+    public void createPost(String permalink, String title, String date) throws IncorrectPermalinkException, NotFoundException {
+        shouldHaveNoPermalink(permalink);
+        postsCollection.insertOne(
+                    Requests.createPost(title, permalink, DataConverter.convertToDate(date)));
     }
 
-    private TagModel revertTag(String tagCode) {
-        TagModel tag = new TagModel();
-        tag.setTagCode(tagCode);
-        tag.setTagName(tagCode.replaceAll("-", " "));
-        return tag;
+    public void updatePost(String permalink, String newPermalink, String title, String date, String allTags)
+            throws IncorrectPermalinkException, NotFoundException {
+        boolean isRename = !newPermalink.equals(permalink);
+        if (isRename) {
+            shouldHavePermalink(permalink);
+            shouldHaveNoPermalink(newPermalink);
+        } else {
+            shouldHavePermalink(permalink);
+        }
+
+        postsCollection.updateOne(
+                Requests.findByPermalink(permalink),
+                Requests.updatePost(
+                        newPermalink,
+                        title,
+                        DataConverter.convertToDate(date),
+                        DataConverter.convertTags(allTags)));;
+    }
+
+    public void publishPost(String permalink) throws NotFoundException {
+        shouldHavePermalink(permalink);
+        postsCollection.updateOne(
+                Requests.findByPermalink(permalink),
+                Requests.updateStatus(PostStatus.PUBLISHED));
+    }
+
+    public void revokePost(String permalink) throws NotFoundException {
+        shouldHavePermalink(permalink);
+        postsCollection.updateOne(
+                Requests.findByPermalink(permalink),
+                Requests.updateStatus(PostStatus.DRAFT));
     }
 
     private String findContentByPermalink(String permalink) {
         GridFSDBFile postContent = gridFs.findOne(permalink + CONTENT_EXTENSION);
         if (postContent != null) {
             try {
-                return getStringFromInputStream(postContent.getInputStream());
+                return DataConverter.getStringFromInputStream(postContent.getInputStream());
             } catch (IOException e) {
                 LOGGER.info("Please, check post=" + permalink);
                 return "Text for this post is broken.";
@@ -214,17 +246,10 @@ public class DatabaseService {
         return "There is no text for this post.";
     }
 
-    private static String getStringFromInputStream(InputStream is) throws IOException {
-        try (InputStreamReader source = new InputStreamReader(is);
-             BufferedReader bufferedReader = new BufferedReader(source)) {
-            StringBuilder builder = new StringBuilder();
-            for (String line = bufferedReader.readLine(); line != null; line = bufferedReader.readLine()) {
-                if (builder.length() > 0) {
-                    builder.append(System.lineSeparator());
-                }
-                builder.append(line);
-            }
-            return builder.toString();
-        }
+    public void saveContentByPermalink(String permalink, BufferedReader content) throws IOException {
+        String htmlContent = DataConverter.getStringFromBufferedReader(content);
+        InputStream fileStream = new ByteArrayInputStream(htmlContent.getBytes());
+        gridFs.remove(permalink + CONTENT_EXTENSION);
+        gridFs.createFile(fileStream, permalink + CONTENT_EXTENSION).save();
     }
 }

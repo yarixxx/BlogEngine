@@ -7,7 +7,7 @@
             <section>
                 <header>
                     <h3><a href="/${post["date"]?string["yyyy/MM"]}/${post["name"]}">${post["title"]}</a></h3>
-                    <span>${post["date"]?date}</span>
+                    <time>${post["date"]?date}</time>
                 </header>
 
                 <div>
@@ -22,7 +22,7 @@
                         </#list>
                     </div>
                 </#if>
-            <section>
+            </section>
         </#list>
 
         <#if page??>

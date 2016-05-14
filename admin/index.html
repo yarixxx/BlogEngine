@@ -1,0 +1,85 @@
+<html>
+<head>
+    <title>YarixLab</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+
+    <!-- Angular Material Library -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+
+    <script src="/admin/tinymce/tinymce.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.min.js"></script>
+
+    <!-- Application -->
+
+    <script src="/admin/app.js"></script>
+    <script src="/admin/services/Charts.js"></script>
+    <script src="/admin/services/DataService.js"></script>
+    <script src="/admin/services/DynamicPosts.js"></script>
+    <script src="/admin/services/EditorService.js"></script>
+    <script src="/admin/HomeCtrl.js"></script>
+
+    <link href="/admin/admin-styles.css" type='text/css' rel='stylesheet' />
+    <link href="/admin/favicon.ico" type="image/x-icon" rel="shortcut icon" />
+
+    <base href="/admin/" />
+</head>
+<body ng-app="blogAdminApp" layout="column" ng-controller="HomeCtrl as HomeCtrl" class="blog-engine-admin">
+    <md-toolbar layout="row">
+        <md-button hide-gt-md ng-click="HomeCtrl.toggleLeftSideNav()"><md-icon aria-label="Menu">menu</md-icon></md-button>
+        <h2 class="md-toolbar-tools"><span>Title</span></h2>
+    </md-toolbar>
+    <div flex layout="row">
+        <md-sidenav class="md-sidenav-left"
+                    md-component-id="left"
+                    md-is-locked-open="$mdMedia('gt-md')"
+                    md-whiteframe="4"
+                    layout="column">
+
+            <md-button class="md-raised" ng-click="HomeCtrl.createPost()">Write Post</md-button>
+
+            <md-subheader class="md-primary">Filter</md-subheader>
+            <md-select ng-model="HomeCtrl.postStatusFilter"
+                       md-on-close="HomeCtrl.filterPosts()"
+                       aria-label="Filter">
+                <md-option value="ALL">ALL</md-option>
+                <md-option value="PUBLISHED">PUBLISHED</md-option>
+                <md-option value="DRAFT">DRAFT</md-option>
+            </md-select>
+
+            <md-subheader class="md-primary">Posts</md-subheader>
+
+
+                <md-virtual-repeat-container class="posts-list" flex>
+                    <md-list>
+                        <md-list-item md-virtual-repeat="post in HomeCtrl.dynamicPosts"
+                                      ng-class="{ 'md-whiteframe-1dp' : post.name == HomeCtrl.selectedPost.name }"
+                                      md-on-demand
+                                      md-item-size="40"
+                                      ng-click="HomeCtrl.selectPost(post)"
+                                      layout="row"
+                                      class="repeated-item" flex>
+                            <md-icon>{{ post.status == 'PUBLISHED' ? 'visibility' : 'visibility_off' }}</md-icon>
+                            <span flex>{{ post.title }}</span>
+                        </md-list-item>
+                        <md-divider></md-divider>
+                    </md-list>
+                </md-virtual-repeat-container>
+
+
+        </md-sidenav>
+
+        <md-content flex class="md-whiteframe-1dp" layout-margin layout-padding layout-fill layout="column" ng-view>
+            <div ng-include="HomeCtrl.template"></div>
+        </md-content>
+    </div>
+</body>
+</html>

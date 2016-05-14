@@ -1,0 +1,43 @@
+<div layout="row">
+    <md-card flex>
+        <md-card-title>
+            <md-card-title-text>
+                <span class="md-headline">Top 10 tags</span>
+            </md-card-title-text>
+        </md-card-title>
+        <md-card-content>
+            <md-tabs class="charts-height">
+                <md-tab label="List">
+                    <md-tag-body>
+                        <md-chips ng-model="HomeCtrl.tags" readonly="true">
+                        <md-chip-template>
+                        <strong>{{ $chip._id }}</strong>({{ $chip.count }})
+                        </md-chip-template>
+                        </md-chips>
+                    </md-tag-body>
+                </md-tab>
+                <md-tab label="Bar Chart">
+                    <md-tab-body>
+                        <div id="tags-bar-chart"></div>
+                    </md-tab-body>
+                </md-tab>
+                <md-tab label="Donut Chart">
+                    <md-tab-body>
+                        <div id="tags-donut-chart"></div>
+                    </md-tab-body>
+                </md-tab>
+            </md-tabs>
+        </md-card-content>
+    </md-card>
+
+    <md-card flex>
+        <md-card-title>
+            <md-card-title-text>
+                <span class="md-headline">Publish dynamics</span>
+            </md-card-title-text>
+        </md-card-title>
+        <md-card-content>
+            <div id="publish-dynamics" class="charts-height"></div>
+        </md-card-content>
+    </md-card>
+</div>

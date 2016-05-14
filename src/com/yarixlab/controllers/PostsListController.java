@@ -1,5 +1,6 @@
 package com.yarixlab.controllers;
 
+import com.yarixlab.PostStatus;
 import com.yarixlab.exceptions.NotFoundException;
 import com.yarixlab.TemplateFields;
 import org.bson.Document;
@@ -35,7 +36,7 @@ public class PostsListController extends BlogController {
             throw new NotFoundException("Page not found.");
         }
 
-        List<Document> posts = dataService.findByDateDescending(5, page);
+        List<Document> posts = dataService.showPageByDateDescending(5, page, PostStatus.PUBLISHED);
         if (posts.isEmpty()) {
             throw new NotFoundException("There is no posts.");
         }

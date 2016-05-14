@@ -1,0 +1,86 @@
+.mce-btn i {
+    display: inline;
+}
+
+.mce-container .mce-btn button {
+    padding: 8px 16px;
+}
+
+.mce-container .mce-flow-layout-item {
+    margin: 0;
+}
+
+.blog-engine-admin .mce-panel,
+.mce-btn-group .mce-btn:hover,
+.mce-btn-group .mce-btn {
+    border: 0;
+}
+
+.mce-i-bold:before,
+.mce-i-italic:before,
+.mce-i-underline:before,
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+}
+
+.mce-i-bold:before {
+    content: 'format_bold' !important;
+}
+
+.mce-i-italic:before {
+    content: 'format_italic' !important;
+}
+
+.mce-i-underline:before {
+    content: 'format_underlined' !important;
+}
+
+.blog-engine-admin .layout-fill {
+    min-height: initial;
+    height: auto;
+}
+
+
+#postEditor {
+    width: 100%;
+    height: 400px;
+    font-family: monospace;
+}
+
+pre {
+    background: #ded;
+    padding: 5px;
+}
+
+.selected-post .md-button {
+
+}
+
+.my-fab-button {
+    position: static;
+}
+
+.charts-height {
+    min-height: 450px !important;
+}

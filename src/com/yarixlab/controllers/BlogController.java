@@ -50,9 +50,9 @@ public abstract class BlogController extends HttpServlet {
 
         model = new SimpleHash();
         model.put(TemplateFields.BLOG_TITLE.toString(), context.getInitParameter(ContextParameters.BLOG_TITLE.toString()));
-        model.put(TemplateFields.LATEST_POSTS.toString(), dataService.findLatestPosts(5));
+        model.put(TemplateFields.LATEST_POSTS.toString(), dataService.listLatestPublishedPosts(5));
         model.put(TemplateFields.TOP_TAGS.toString(), dataService.getTopTags(5));
-        model.put(TemplateFields.ARCHIVE.toString(), dataService.getArchiveByYears());
+        model.put(TemplateFields.ARCHIVE.toString(), dataService.getArchiveByYearsSafe());
     }
 
     @Override
@@ -73,5 +73,9 @@ public abstract class BlogController extends HttpServlet {
     private String getConfigParameter(ServletConfig config, String parameter, String defaultValue) {
         String parameterValue = config.getInitParameter(parameter);
         return parameterValue == null ? defaultValue : parameterValue;
+    }
+
+    protected String getValue(String value, String defaultValue) {
+        return value == null ? defaultValue : value;
     }
 }

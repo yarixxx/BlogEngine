@@ -1,0 +1,45 @@
+<div class="md-whiteframe-1dp" layout-margin layout-padding layout="column" class="one-post">
+    <div>
+        <md-input-container class="md-block">
+            <label>Title</label>
+            <input ng-model="HomeCtrl.selectedPost.title">
+        </md-input-container>
+    </div>
+
+    <div layout="row" layout-sm="column">
+            <md-input-container class="md-block" flex-gt-xs>
+                <label>Permalink</label>
+                <input ng-model="HomeCtrl.selectedPost.name">
+            </md-input-container>
+    </div>
+
+    <div layout="row">
+        <md-datepicker ng-model="HomeCtrl.selectedPost.date"></md-datepicker>
+    </div>
+
+    <div>
+        <md-chips placeholder="Enter a tag" ng-model="HomeCtrl.selectedPost.tags"></md-chips>
+    </div>
+
+    <div>
+        <md-switch ng-model="HomeCtrl.isRawHtml" aria-label="Raw HTML" ng-change="HomeCtrl.switchRawHtml()">
+            Show Raw HTML
+        </md-switch>
+        <div id="postEditorWrapper">
+            <textarea id="postEditor" ng-model="HomeCtrl.selectedPost.content"></textarea>
+        </div>
+        <md-divider></md-divider>
+    </div>
+
+    <div layout-align="center center">
+        <md-button class="md-raised"
+                ng-click="HomeCtrl.savePost()">Save</md-button>
+
+        <md-button class="md-raised"
+                   ng-disabled="HomeCtrl.selectedPost.status == 'PUBLISHED'"
+                   ng-click="HomeCtrl.publishPost()">Publish</md-button>
+        <md-button class="md-raised"
+                   ng-disabled="HomeCtrl.selectedPost.status == 'DRAFT'"
+                   ng-click="HomeCtrl.revokePost()">Revoke</md-button>
+    </div>
+</div>
