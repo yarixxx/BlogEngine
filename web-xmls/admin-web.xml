@@ -1,0 +1,62 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+    <description>Admin Servlet</description>
+
+    <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>default</realm-name>
+    </login-config>
+
+    <security-role>
+        <role-name>
+            author
+        </role-name>
+    </security-role>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>BlogEngineAdmin</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>author</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <context-param>
+        <param-name>blogTitle</param-name>
+        <param-value>Blog Engine</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>mongoDatabase</param-name>
+        <param-value>test</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>mongoCollection</param-name>
+        <param-value>posts</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>templatePath</param-name>
+        <param-value>freemarker-templates</param-value>
+    </context-param>
+
+    <servlet>
+        <servlet-name>AdminServlet</servlet-name>
+        <servlet-class>com.yarixlab.controllers.AdminPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>AdminServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminServlet</servlet-name>
+        <url-pattern>*.json</url-pattern>
+    </servlet-mapping>
+
+</web-app>

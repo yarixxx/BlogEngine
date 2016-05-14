@@ -1,0 +1,41 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+    <description>Tag Servlet</description>
+
+    <context-param>
+        <param-name>blogTitle</param-name>
+        <param-value>Blog Engine</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>mongoDatabase</param-name>
+        <param-value>test</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>mongoCollection</param-name>
+        <param-value>posts</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>templatePath</param-name>
+        <param-value>freemarker-templates</param-value>
+    </context-param>
+
+   <servlet>
+        <servlet-name>TagServlet</servlet-name>
+        <servlet-class>com.yarixlab.controllers.TagController</servlet-class>
+       <init-param>
+           <param-name>template</param-name>
+           <param-value>TagServlet</param-value>
+       </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TagServlet</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>
