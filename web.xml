@@ -69,4 +69,122 @@
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>AdminServlet</servlet-name>
+        <servlet-class>com.yarixlab.controllers.AdminPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>AdminServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminServlet</servlet-name>
+        <url-pattern>/admin/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminMetaServlet</servlet-name>
+        <servlet-class>com.yarixlab.controllers.AdminPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>AdminServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminMetaServlet</servlet-name>
+        <url-pattern>/admin-meta/*</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>PostServlet2016</servlet-name>
+        <servlet-class>com.yarixlab.controllers.BlogPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>PostServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PostServlet2016</servlet-name>
+        <url-pattern>/2016/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PostServlet2015</servlet-name>
+        <servlet-class>com.yarixlab.controllers.BlogPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>PostServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PostServlet2015</servlet-name>
+        <url-pattern>/2015/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PostServlet2014</servlet-name>
+        <servlet-class>com.yarixlab.controllers.BlogPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>PostServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PostServlet2014</servlet-name>
+        <url-pattern>/2014/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PostServlet2013</servlet-name>
+        <servlet-class>com.yarixlab.controllers.BlogPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>PostServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PostServlet2013</servlet-name>
+        <url-pattern>/2013/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PostServlet2012</servlet-name>
+        <servlet-class>com.yarixlab.controllers.BlogPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>PostServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PostServlet2012</servlet-name>
+        <url-pattern>/2012/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PostServlet2011</servlet-name>
+        <servlet-class>com.yarixlab.controllers.BlogPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>PostServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PostServlet2011</servlet-name>
+        <url-pattern>/2011/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PostServlet2010</servlet-name>
+        <servlet-class>com.yarixlab.controllers.BlogPostController</servlet-class>
+        <init-param>
+            <param-name>template</param-name>
+            <param-value>PostServlet</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PostServlet2010</servlet-name>
+        <url-pattern>/2010/*</url-pattern>
+    </servlet-mapping>
+
 </web-app>
