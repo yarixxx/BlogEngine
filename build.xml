@@ -2,7 +2,10 @@
 <project name="Blog Engine" default="usage" basedir=".">
   <description>Blog engine builder</description>
 
+  <property file="configuration.properties"/>
+
   <target name="usage">
+    <echo message="${external.server}" />
     <echo message=""/>
     <echo message="Blog engine build file"/>
     <echo message="-----------------------------------"/>
@@ -10,8 +13,7 @@
     <echo message="Available targets are:"/>
     <echo message=""/>
     <echo message="build                --> Build the application"/>
-    <echo message="create-war           --> Create war package with application"/>
-    <echo message="create-static-war    --> Create plain war package with static resources"/>
+    <echo message="create-wars          --> Create war packages"/>
     <echo message="reset-db             --> Reload database and content files"/>
     <echo message=""/>
   </target>
@@ -19,6 +21,15 @@
   <target name="clean">
     <delete dir="build/classes" />
     <mkdir dir="build/classes"/>
+  </target>
+
+  <target name="remove-wars">
+    <delete file="wars/ROOT.war" />
+    <delete file="wars/all-tags.war" />
+    <delete file="wars/tag.war" />
+    <delete file="wars/page.war" />
+    <delete file="wars/post.war" />
+    <delete file="wars/static.war" />
   </target>
 
   <target name="compile">
@@ -33,40 +44,93 @@
     </javac>
   </target>
 
-  <target name="war">
-    <war destfile="blogEngine.war" webxml="web.xml">
+  <target name="index-war">
+    <war destfile="wars/ROOT.war" webxml="web-xmls/index-web.xml">
       <classes dir="build/classes"/>
     </war>
   </target>
 
-  <target name="build" depends="clean,compile" />
+  <target name="all-tags-war">
+    <war destfile="wars/all-tags.war" webxml="web-xmls/all-tags-web.xml">
+      <classes dir="build/classes"/>
+    </war>
+  </target>
 
-  <target name="create-war" depends="clean,compile,war" />
+  <target name="tag-war">
+    <war destfile="wars/tag.war" webxml="web-xmls/tag-web.xml">
+      <classes dir="build/classes"/>
+    </war>
+  </target>
 
+  <target name="post-war">
+    <war destfile="wars/post.war" webxml="web-xmls/post-web.xml">
+      <classes dir="build/classes"/>
+    </war>
+  </target>
 
-  <target name="create-static-war">
-    <war destfile="static.war" basedir="public/" needxmlfile="false">
+  <target name="page-war">
+    <war destfile="wars/page.war" webxml="web-xmls/page-web.xml">
+      <classes dir="build/classes"/>
+    </war>
+  </target>
+
+  <target name="static-war">
+    <delete file="wars/static.war" />
+    <war destfile="wars/static.war" basedir="public/" needxmlfile="false">
       <fileset dir="public/"/>
     </war>
   </target>
 
-
-  <target name="replace-content-files">
-    <apply executable="mongofiles" append="true" type="both">
-      <arg value="put"/>
-      <fileset dir="dummy-data/" includes="**/*.html"/>
-      <arg value="-r"/>
-    </apply>
+  <target name="admin-static-war">
+    <delete file="wars/admin.war" />
+    <war destfile="wars/admin.war" basedir="admin/" needxmlfile="false">
+      <fileset dir="admin/"/>
+    </war>
   </target>
 
-  <target name="replace-metadata">
-    <exec executable="mongo" inputstring="db.posts.drop()">
+  <target name="admin-war" depends="build">
+    <delete file="wars/admin-rest.war" />
+    <war destfile="wars/admin-rest.war" webxml="web-xmls/admin-web.xml">
+      <classes dir="build/classes"/>
+    </war>
+  </target>
+
+  <target name="create-wars" depends="remove-wars,index-war,all-tags-war,tag-war,post-war,page-war,static-war" />
+
+  <target name="build" depends="clean,compile" />
+
+  <target name="deploy-to-external-server" depends="create-wars">
+    <exec executable="scp">
+      <arg value="wars/ROOT.war" />
+      <arg value="wars/static.war" />
+      <arg value="wars/all-tags.war" />
+      <arg value="wars/admin.war" />
+      <arg value="wars/tag.war" />
+      <arg value="wars/page.war" />
+      <arg value="wars/post.war" />
+      <arg value="${external.server}${tomcat.path}/webapps/" />
     </exec>
-    <apply executable="mongo" verbose="true">
-      <fileset dir="dummy-data/" includes="**/*.js"/>
-    </apply>
+    <exec executable="scp">
+      <arg file="freemarker-templates/common.ftl"/>
+      <arg file="freemarker-templates/BlogServlet.ftl"/>
+      <arg file="freemarker-templates/TagServlet.ftl"/>
+      <arg file="freemarker-templates/AllTagsServlet.ftl"/>
+      <arg file="freemarker-templates/PostServlet.ftl"/>
+      <arg value="${external.server}${tomcat.path}/freemarker-templates/" />
+    </exec>
   </target>
 
-  <target name="reset-db" depends="replace-content-files,replace-metadata" />
+
+  <target name="deploy-admin-to-external-server" depends="admin-war,admin-static-war">
+    <exec executable="scp">
+      <arg value="wars/admin-rest.war" />
+      <arg value="wars/admin.war" />
+      <arg value="${external.server}${tomcat.path}/webapps/" />
+    </exec>
+    <exec executable="scp">
+      <arg file="admin/index.html"/>
+      <arg value="${external.server}${tomcat.path}/freemarker-templates/" />
+    </exec>
+  </target>
 
 </project>
