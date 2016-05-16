@@ -21,7 +21,11 @@
         <md-chips placeholder="Enter a tag" ng-model="HomeCtrl.selectedPost.tags"></md-chips>
     </div>
 
-    <div>
+    <div ng-if="HomeCtrl.isReading">
+        <div ng-bind-html="HomeCtrl.selectedPost.content"></div>
+    </div>
+
+    <div ng-if="!HomeCtrl.isReading">
         <md-switch ng-model="HomeCtrl.isRawHtml" aria-label="Raw HTML" ng-change="HomeCtrl.switchRawHtml()">
             Show Raw HTML
         </md-switch>
@@ -41,5 +45,7 @@
         <md-button class="md-raised"
                    ng-disabled="HomeCtrl.selectedPost.status == 'DRAFT'"
                    ng-click="HomeCtrl.revokePost()">Revoke</md-button>
+
+        <md-button  ng-if="HomeCtrl.isReading" ng-click="HomeCtrl.isReading = false;">Edit</md-button>
     </div>
 </div>

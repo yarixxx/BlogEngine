@@ -1,3 +1,3 @@
 'use strict';
 
-var blogAdminApp = angular.module('blogAdminApp', ['ngMaterial']);
+var blogAdminApp = angular.module('blogAdminApp', ['ngMaterial', 'ngSanitize']);

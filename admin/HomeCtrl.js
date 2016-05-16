@@ -1,12 +1,14 @@
 'use strict';
 
-blogAdminApp.controller('HomeCtrl', function($scope, $mdDialog, $mdSidenav, dataService, dynamicPostsService, chartsService, editorService) {
+blogAdminApp.controller('HomeCtrl', function($scope, $mdDialog, $mdToast, $mdSidenav, dataService, dynamicPostsService, chartsService, editorService) {
 
     this.posts = [];
 
     this.chartsService = chartsService;
     this.dataService = dataService;
     this.editorService = editorService;
+
+    this.notification = $mdToast;
 
     this.editorService.init('postEditor', 'postEditorWrapper');
 
@@ -18,6 +20,8 @@ blogAdminApp.controller('HomeCtrl', function($scope, $mdDialog, $mdSidenav, data
     this.selectedPost;
     this.dynamicPosts = dynamicPostsService;
 
+    this.isReading = true;
+
 
     this.toggleLeftSideNav = function() {
         $mdSidenav('left').toggle();
@@ -25,6 +29,7 @@ blogAdminApp.controller('HomeCtrl', function($scope, $mdDialog, $mdSidenav, data
     };
 
     this.savePost = function() {
+        console.log(this.selectedPost);
         var postParams = {
             name: this.selectedPost.name,
             oldName: this.selectedPost.oldName,
@@ -32,10 +37,16 @@ blogAdminApp.controller('HomeCtrl', function($scope, $mdDialog, $mdSidenav, data
             allTags: this.selectedPost.tags.join(),
             timestamp: this.selectedPost.date.getTime()
         };
-        this.selectedPost.content = this.editorService.getContent();
-        console.log(this.selectedPost);
+        if (!this.isReading) {
+            this.selectedPost.content = this.editorService.getContent();
+        }
         if (this.selectedPost.content != '') {
-            this.dataService.savePost(postParams, this.selectedPost.content);
+            this.dataService.savePost(postParams, this.selectedPost.content).then(function(response) {
+                this.notification.show(this.notification.simple().textContent(response.data).hideDelay(3000));
+            }.bind(this)).then(function(response) {
+                this.selectedPost.oldName = this.selectedPost.name;
+
+            }.bind(this));
         }
     };
 
@@ -61,7 +72,9 @@ blogAdminApp.controller('HomeCtrl', function($scope, $mdDialog, $mdSidenav, data
             if (newPost) {
                 this.selectPost(newPost);
             }
-        }.bind(this));
+        }.bind(this)).then(function(response) {
+            this.notification.show(this.notification.simple().textContent(response.data).hideDelay(3000));
+        }.bind(this));;
     };
 
     this.selectPost = function(post) {
@@ -83,12 +96,16 @@ blogAdminApp.controller('HomeCtrl', function($scope, $mdDialog, $mdSidenav, data
 
     this.publishPost = function() {
         this.selectedPost.status = 'PUBLISHED';
-        this.dataService.publishPost(this.selectedPost.name);
+        this.dataService.publishPost(this.selectedPost.name).then(function(response) {
+            this.notification.show(this.notification.simple().textContent(response.data).hideDelay(3000));
+        }.bind(this));
     };
 
     this.revokePost = function() {
         this.selectedPost.status = 'DRAFT';
-        this.dataService.revokePost(this.selectedPost.name);
+        this.dataService.revokePost(this.selectedPost.name).then(function(response) {
+            this.notification.show(this.notification.simple().textContent(response.data).hideDelay(3000));
+        }.bind(this));
     };
 
     this.filterPosts = function() {
